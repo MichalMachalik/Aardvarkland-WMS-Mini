@@ -2,7 +2,7 @@
 
 Offline warehouse app for one device. It runs as a PWA or Android app and keeps warehouse data locally.
 
-[Live Preview](https://michalmachalik.github.io/Aardvarkland-WMS-Mini-Public/) · [Android notes](ANDROID.md) · [Full WMS](https://github.com/MichalMachalik/Aardvarkland-WMS-Public)
+[Live Preview](https://michalmachalik.github.io/Aardvarkland-WMS-Mini/) · [Android notes](ANDROID.md) · [Full WMS](https://github.com/MichalMachalik/Aardvarkland-WMS)
 
 The preview opens the same warehouse application as the standalone web build, with a sample workspace. Its changes and movement history are stored in your browser profile.
 
@@ -23,8 +23,8 @@ The preview opens the same warehouse application as the standalone web build, wi
 Requires Node.js 24.15+ and npm 11.12+.
 
 ```bash
-git clone https://github.com/MichalMachalik/Aardvarkland-WMS-Mini-Public.git
-cd Aardvarkland-WMS-Mini-Public
+git clone https://github.com/MichalMachalik/Aardvarkland-WMS-Mini.git
+cd Aardvarkland-WMS-Mini
 npm ci
 npm run dev
 ```

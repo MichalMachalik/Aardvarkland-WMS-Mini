@@ -151,7 +151,7 @@ and **five committed writes** per case produced the following medians:
 
 The one-time migration took **274 ms** for 10,000 movements and **2,858 ms**
 for 50,000 movements on that runner. See the
-[benchmark workflow and artifact instructions](https://github.com/MichalMachalik/Aardvarkland-WMS-Mini-Public/actions/workflows/storage-benchmark.yml).
+[benchmark workflow and artifact instructions](https://github.com/MichalMachalik/Aardvarkland-WMS-Mini/actions/workflows/storage-benchmark.yml).
 These are synthetic, environment-specific measurements, not production
 latency guarantees. Benchmark results should be rechecked on actual
 Android and desktop devices before rollout.
