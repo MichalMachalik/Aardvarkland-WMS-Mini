@@ -2,7 +2,7 @@
 
 ## Required environment
 
-- Node.js 22+ and npm
+- Node.js 24.15+ and npm 11.12+
 - JDK 21 (the checked-in Gradle wrapper 8.14.3 does not run on JDK 25)
 - Android SDK Platform 36, Build Tools, and platform-tools
 - Android Studio is optional for CLI builds, but useful for device inspection
@@ -17,7 +17,6 @@ and `targetSdkVersion = 36` in `android/variables.gradle`.
 ```powershell
 # Set JAVA_HOME to your local JDK 21 installation before running Gradle.
 $env:GRADLE_OPTS = '-Djavax.net.ssl.trustStoreType=Windows-ROOT'
-npm run android:sync
 npm run android:debug
 npm run android:release:aab
 ```

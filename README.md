@@ -39,12 +39,18 @@ npm test
 npm run build
 ```
 
-Build the same bundle as the live preview with `node scripts/build-preview.mjs`. Serve `dist/` over HTTP and open `/app/` to run the warehouse application directly.
+To reproduce the published preview, run the following commands from the project root. Open the [guide](http://127.0.0.1:4175/) or go directly to the [warehouse](http://127.0.0.1:4175/app/). Both the standalone and preview builds write to `dist/`, so run the preview build last when testing the guide.
+
+```sh
+node scripts/build-preview.mjs
+python -m http.server 4175 --bind 127.0.0.1 --directory dist
+```
 
 ## Android
 
-```bash
-npm run android:sync
+On Windows, the debug build also syncs the current web assets into the Android project.
+
+```powershell
 npm run android:debug
 ```
 
