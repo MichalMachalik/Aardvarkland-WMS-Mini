@@ -76,6 +76,7 @@ const cs = {
   scanPlaceholder: 'Sken nebo kód produktu',
   findProduct: 'Najít',
   scanNotFound: 'Produkt s tímto kódem nebyl nalezen.',
+  scanAmbiguous: 'Kód odpovídá více produktům. Vyberte produkt ze seznamu.',
   movementType: 'Typ pohybu',
   product: 'Produkt',
   fromLocation: 'Z lokace',
@@ -125,6 +126,7 @@ const cs = {
 type Copy = { [K in keyof typeof cs]: string };
 
 const en: Copy = {
+  scanAmbiguous: 'This code matches multiple products. Select a product from the list.',
   appSubtitle: 'Mini warehouse · fully offline', localOnly: 'Data stays on this device', saved: 'Saved on device',
   navDashboard: 'Overview', navStock: 'Stock', navOperations: 'Movement', navHistory: 'History', navData: 'Data',
   warehouse: 'Warehouse name', warehousePlaceholder: 'For example Main warehouse', saveName: 'Save name',
@@ -139,6 +141,7 @@ const en: Copy = {
 };
 
 const ua: Copy = {
+  scanAmbiguous: 'Цей код відповідає кільком товарам. Виберіть товар зі списку.',
   appSubtitle: 'Мінісклад · повністю офлайн', localOnly: 'Дані залишаються на цьому пристрої', saved: 'Збережено на пристрої',
   navDashboard: 'Огляд', navStock: 'Запаси', navOperations: 'Рух', navHistory: 'Історія', navData: 'Дані',
   warehouse: 'Назва складу', warehousePlaceholder: 'Наприклад, Головний склад', saveName: 'Зберегти назву',
@@ -153,6 +156,7 @@ const ua: Copy = {
 };
 
 const fr: Copy = {
+  scanAmbiguous: 'Ce code correspond à plusieurs produits. Sélectionnez un produit dans la liste.',
   appSubtitle: 'Mini-entrepôt · entièrement hors ligne', localOnly: 'Les données restent sur cet appareil', saved: 'Enregistré sur l’appareil',
   navDashboard: 'Aperçu', navStock: 'Stock', navOperations: 'Mouvement', navHistory: 'Historique', navData: 'Données',
   warehouse: 'Nom de l’entrepôt', warehousePlaceholder: 'Par exemple Entrepôt principal', saveName: 'Enregistrer le nom',
@@ -167,6 +171,7 @@ const fr: Copy = {
 };
 
 const de: Copy = {
+  scanAmbiguous: 'Dieser Code gehört zu mehreren Produkten. Wählen Sie ein Produkt aus der Liste aus.',
   appSubtitle: 'Mini-Lager · vollständig offline', localOnly: 'Die Daten bleiben auf diesem Gerät', saved: 'Auf dem Gerät gespeichert',
   navDashboard: 'Übersicht', navStock: 'Bestand', navOperations: 'Bewegung', navHistory: 'Verlauf', navData: 'Daten',
   warehouse: 'Lagername', warehousePlaceholder: 'Zum Beispiel Hauptlager', saveName: 'Namen speichern',
@@ -181,6 +186,7 @@ const de: Copy = {
 };
 
 const es: Copy = {
+  scanAmbiguous: 'Este código coincide con varios productos. Seleccione un producto de la lista.',
   appSubtitle: 'Mini almacén · totalmente sin conexión', localOnly: 'Los datos permanecen en este dispositivo', saved: 'Guardado en el dispositivo',
   navDashboard: 'Resumen', navStock: 'Existencias', navOperations: 'Movimiento', navHistory: 'Historial', navData: 'Datos',
   warehouse: 'Nombre del almacén', warehousePlaceholder: 'Por ejemplo Almacén principal', saveName: 'Guardar nombre',

@@ -134,11 +134,11 @@ const demoState = {
   updatedAt: now,
 };
 
-async function seedMini(page, theme = 'light') {
+async function seedMini(page, theme = 'light', state = demoState) {
   const envelope = {
     persistenceVersion: 1,
     savedAt: '2026-08-17T00:00:01.000Z',
-    state: demoState,
+    state,
   };
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -170,6 +170,79 @@ async function expectDateErrorGap(page) {
 }
 
 test.describe('WMS-Mini visual smoke', () => {
+  test('scanner accepts Enter and Tab while preserving keyboard navigation', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await seedMini(page);
+    await openMini(page);
+    await page.locator('.sidebar nav button').nth(2).click();
+
+    const scan = page.getByPlaceholder('Sken nebo kód produktu');
+    const find = page.getByRole('button', { name: 'Najít', exact: true });
+    const selection = page.locator('.selected-product');
+
+    await scan.press('Tab');
+    await expect(find).toBeFocused();
+    await expect(selection).toHaveCount(0);
+
+    await scan.fill('859000000001');
+    await scan.press('Tab');
+    await expect(find).toBeFocused();
+    await expect(selection).toContainText('Průmyslové rukavice');
+
+    await find.press('Shift+Tab');
+    await expect(scan).toBeFocused();
+    await scan.fill('MAZ-500');
+    await scan.press('Shift+Tab');
+    await expect(scan).not.toBeFocused();
+    await expect(selection).toContainText('Průmyslové rukavice');
+
+    await scan.press('Enter');
+    await expect(selection).toContainText('Mazivo 500 ml');
+    await expect(scan).toHaveValue('859000000002');
+  });
+
+  test('unknown and ambiguous scans cannot reuse a previous product', async ({ page }) => {
+    const conflictingProduct = {
+      ...demoState.products[0],
+      id: 'product-conflict',
+      sku: '859000000001',
+      name: 'Kontrolní materiál',
+      barcode: 'QA-205',
+    };
+    await seedMini(page, 'light', { ...demoState, products: [...demoState.products, conflictingProduct] });
+    await openMini(page);
+    await page.locator('.sidebar nav button').nth(2).click();
+
+    const scan = page.getByPlaceholder('Sken nebo kód produktu');
+    const product = page.getByRole('combobox', { name: 'Produkt', exact: true });
+    const selection = page.locator('.selected-product');
+
+    await scan.fill('MAZ-500');
+    await scan.press('Enter');
+    await expect(selection).toContainText('Mazivo 500 ml');
+    await page.getByRole('button', { name: 'Výdej', exact: true }).click();
+    await page.getByRole('combobox', { name: 'Z lokace', exact: true }).selectOption('location-a01');
+    const batch = page.getByRole('combobox', { name: 'Vyberte šarži', exact: true });
+    await batch.selectOption('batch-lube-001');
+
+    await scan.fill('NEEXISTUJE');
+    await scan.press('Enter');
+    await expect(page.getByText('Produkt s tímto kódem nebyl nalezen.', { exact: true })).toBeVisible();
+    await expect(product).toHaveValue('');
+    await expect(selection).toHaveCount(0);
+
+    await product.selectOption('product-lube');
+    await expect(batch).toHaveValue('');
+    await scan.fill('859000000001');
+    await scan.press('Enter');
+    await expect(page.getByText('Kód odpovídá více produktům. Vyberte produkt ze seznamu.', { exact: true })).toBeVisible();
+    await expect(product).toHaveValue('');
+    await expect(selection).toHaveCount(0);
+
+    await product.selectOption('product-gloves');
+    await expect(selection).toContainText('Průmyslové rukavice');
+  });
+
   test('desktop warehouse flow is usable and captured', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await seedMini(page);

@@ -537,14 +537,27 @@ function Operations({ state, setState, copy, notify, initialType }: {
     setType(initialType);
   }, [initialType]);
 
+  const selectProduct = useCallback((id: string) => {
+    if (id === productId) return;
+    setProductId(id);
+    setBatchId('');
+  }, [productId]);
+
   const resolveScan = useCallback((raw: string) => {
     const value = raw.trim().toLocaleLowerCase();
     if (!value) return;
-    const product = state.products.find((item) => item.sku.toLocaleLowerCase() === value || item.barcode.toLocaleLowerCase() === value);
-    if (!product) return notify(copy.scanNotFound);
-    setProductId(product.id);
+    const matches = state.products.filter((item) =>
+      item.sku.toLocaleLowerCase() === value || item.barcode.toLocaleLowerCase() === value,
+    );
+    if (matches.length !== 1) {
+      selectProduct('');
+      notify(matches.length ? copy.scanAmbiguous : copy.scanNotFound);
+      return;
+    }
+    const [product] = matches;
+    selectProduct(product.id);
     setScan(product.barcode || product.sku);
-  }, [copy.scanNotFound, notify, state.products]);
+  }, [copy.scanAmbiguous, copy.scanNotFound, notify, selectProduct, state.products]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -567,8 +580,9 @@ function Operations({ state, setState, copy, notify, initialType }: {
       <Card title={copy.scanLabel} className="scan-card">
         <p className="muted scan-hint">{copy.mobileScanHint}</p>
         <div className="scan-row">
-          <label className="scan-input"><UiIcon name="search" /><input autoFocus value={scan} placeholder={copy.scanPlaceholder} onChange={(event) => setScan(event.target.value)} onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === 'Tab') { event.preventDefault(); resolveScan(scan); }
+          <label className="scan-input"><UiIcon name="search" /><input autoFocus={window.matchMedia('(pointer: fine)').matches} aria-label={copy.scanLabel} value={scan} placeholder={copy.scanPlaceholder} onChange={(event) => setScan(event.target.value)} onKeyDown={(event) => {
+            if (event.key === 'Enter') event.preventDefault();
+            if (event.key === 'Enter' || (event.key === 'Tab' && !event.shiftKey)) resolveScan(scan);
           }} /></label>
           <button type="button" className="button button--secondary" onClick={() => resolveScan(scan)}><UiIcon name="search" />{copy.findProduct}</button>
           <button type="button" className="button button--accent" onClick={() => setCamera(true)}><UiIcon name="camera" />{copy.cameraOpen}</button>
@@ -580,7 +594,7 @@ function Operations({ state, setState, copy, notify, initialType }: {
           <fieldset className="operation-types"><legend>{copy.movementType}</legend><div>
             {(['RECEIPT', 'ISSUE', 'MOVE', 'COUNT'] as MovementType[]).map((value) => <button type="button" key={value} aria-pressed={type === value} className={type === value ? 'is-active' : ''} onClick={() => setType(value)}><UiIcon name={movementIcon(value)} /><span>{movementLabel(copy, value)}</span></button>)}
           </div></fieldset>
-          <label>{copy.product}<select value={productId} required onChange={(event) => setProductId(event.target.value)}><option value="">{copy.chooseProduct}</option>{state.products.map((product) => <option key={product.id} value={product.id}>{product.sku} · {product.name}</option>)}</select></label>
+          <label>{copy.product}<select value={productId} required onChange={(event) => selectProduct(event.target.value)}><option value="">{copy.chooseProduct}</option>{state.products.map((product) => <option key={product.id} value={product.id}>{product.sku} · {product.name}</option>)}</select></label>
           {(type === 'ISSUE' || type === 'MOVE') && <label>{copy.fromLocation}<select value={fromLocationId} required onChange={(event) => setFromLocationId(event.target.value)}><option value="">{copy.chooseLocation}</option>{state.locations.map((location) => <option key={location.id} value={location.id}>{location.code} · {location.name}</option>)}</select></label>}
           {(type === 'RECEIPT' || type === 'MOVE' || type === 'COUNT') && <label>{copy.toLocation}<select value={toLocationId} required onChange={(event) => setToLocationId(event.target.value)}><option value="">{copy.chooseLocation}</option>{state.locations.map((location) => <option key={location.id} value={location.id}>{location.code} · {location.name}</option>)}</select></label>}
           <label>{copy.quantity}<input type="number" min={type === 'COUNT' ? '0' : '0.0001'} step="any" required value={quantity} onChange={(event) => setQuantity(event.target.value)} /></label>
