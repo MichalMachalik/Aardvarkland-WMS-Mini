@@ -1,3 +1,4 @@
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { LanguageFlag } from './LanguageFlag';
 import { FormEvent, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { downloadBackup } from './backup';
@@ -18,6 +19,9 @@ type IconName = 'dashboard' | 'stock' | 'scan' | 'history' | 'reports' | 'data' 
 
 const languageKey = 'aardvarkland-mini-language';
 const themeKey = 'aardvarkland-ui-theme';
+const warehouseScanner = registerPlugin<{
+  scan(options: { hint: string }): Promise<{ value?: string }>;
+}>('WarehouseScanner');
 const CameraScanner = lazy(() => import('./CameraScanner').then((module) => ({ default: module.CameraScanner })));
 
 function readTheme(): ThemeMode {
@@ -531,6 +535,10 @@ function Operations({ state, setState, copy, notify, initialType }: {
   const [expiryDate, setExpiryDate] = useState('');
   const [scan, setScan] = useState('');
   const [camera, setCamera] = useState(false);
+  const [nativeScanPending, setNativeScanPending] = useState(false);
+  const [imageScanPending, setImageScanPending] = useState(false);
+  const scanImageInput = useRef<HTMLInputElement>(null);
+  const scanPending = nativeScanPending || imageScanPending;
   const selectedProduct = state.products.find((product) => product.id === productId);
 
   useEffect(() => {
@@ -559,6 +567,47 @@ function Operations({ state, setState, copy, notify, initialType }: {
     setScan(product.barcode || product.sku);
   }, [copy.scanAmbiguous, copy.scanNotFound, notify, selectProduct, state.products]);
 
+  const acceptScan = useCallback((value: string) => {
+    setScan(value);
+    resolveScan(value);
+  }, [resolveScan]);
+
+  const cameraResult = useCallback((value: string) => {
+    setCamera(false);
+    acceptScan(value);
+  }, [acceptScan]);
+
+  const readScanImage = async (file: File) => {
+    setImageScanPending(true);
+    try {
+      const { decodeScanImage } = await import('./scanImage');
+      acceptScan(await decodeScanImage(file));
+    } catch {
+      setScan('');
+      selectProduct('');
+      notify(copy.scanImageUnreadable);
+    } finally {
+      setImageScanPending(false);
+    }
+  };
+
+  const openCamera = async () => {
+    if (scanPending) return;
+    if (Capacitor.getPlatform() !== 'android') {
+      setCamera(true);
+      return;
+    }
+    setNativeScanPending(true);
+    try {
+      const { value } = await warehouseScanner.scan({ hint: copy.cameraHint });
+      if (value) acceptScan(value);
+    } catch {
+      notify(copy.cameraDenied);
+    } finally {
+      setNativeScanPending(false);
+    }
+  };
+
   const submit = (event: FormEvent) => {
     event.preventDefault();
     try {
@@ -585,7 +634,13 @@ function Operations({ state, setState, copy, notify, initialType }: {
             if (event.key === 'Enter' || (event.key === 'Tab' && !event.shiftKey)) resolveScan(scan);
           }} /></label>
           <button type="button" className="button button--secondary" onClick={() => resolveScan(scan)}><UiIcon name="search" />{copy.findProduct}</button>
-          <button type="button" className="button button--accent" onClick={() => setCamera(true)}><UiIcon name="camera" />{copy.cameraOpen}</button>
+          <button type="button" className="button button--accent" disabled={scanPending} onClick={() => void openCamera()}><UiIcon name="camera" />{copy.cameraOpen}</button>
+          <button type="button" className="button button--secondary scan-image-button" disabled={scanPending} aria-busy={imageScanPending} onClick={() => scanImageInput.current?.click()}><UiIcon name="scan" />{copy.scanFromImage}</button>
+          <input ref={scanImageInput} type="file" accept="image/jpeg,image/png,image/webp" aria-label={copy.scanFromImage} hidden onChange={(event) => {
+            const file = event.currentTarget.files?.[0];
+            event.currentTarget.value = '';
+            if (file && !scanPending) void readScanImage(file);
+          }} />
         </div>
         {selectedProduct && <div className="selected-product"><span><UiIcon name="product" /></span><div><small>{copy.selectedProduct}</small><strong>{selectedProduct.name}</strong><b>{selectedProduct.sku}{selectedProduct.barcode ? ` · ${selectedProduct.barcode}` : ''}</b></div><strong>{totalStock(state, selectedProduct.id)} {selectedProduct.unit}</strong></div>}
       </Card>
@@ -601,10 +656,10 @@ function Operations({ state, setState, copy, notify, initialType }: {
           {type==='RECEIPT'&&<><label>{copy.lotNumber}<input value={lotNumber} onChange={e=>setLotNumber(e.target.value)}/></label><label>{copy.expiryDate}<input type="date" value={expiryDate} onChange={e=>setExpiryDate(e.target.value)}/></label></>}
           {(type==='ISSUE'||type==='MOVE')&&<label>{copy.chooseBatch}<select value={batchId} onChange={e=>setBatchId(e.target.value)}><option value="">{copy.noBatch}</option>{state.batches.filter(b=>b.productId===productId&&b.locationId===fromLocationId&&b.quantity>0).map(b=><option key={b.id} value={b.id}>{b.lotNumber||'—'} · {b.expiryDate||'—'} · {b.quantity}</option>)}</select></label>}
           <label className="wide-field">{copy.note}<input value={note} placeholder={copy.notePlaceholder} onChange={(event) => setNote(event.target.value)} /></label>
-          <button className="button wide-field" type="submit" disabled={!state.products.length || !state.locations.length}>{copy.submitMovement}</button>
+          <button className="button wide-field" type="submit" disabled={scanPending || !state.products.length || !state.locations.length}>{copy.submitMovement}</button>
         </form>
       </Card>
-      {camera && <Suspense fallback={<div className="camera-backdrop"><div className="camera-loading" role="status"><UiIcon name="camera" /><span>{copy.cameraOpen}</span></div></div>}><CameraScanner hint={copy.cameraHint} denied={copy.cameraDenied} closeLabel={copy.cameraClose} onClose={() => setCamera(false)} onResult={(value) => { setCamera(false); setScan(value); resolveScan(value); }} /></Suspense>}
+      {camera && <Suspense fallback={<div className="camera-backdrop"><div className="camera-loading" role="status"><UiIcon name="camera" /><span>{copy.cameraOpen}</span></div></div>}><CameraScanner hint={copy.cameraHint} denied={copy.cameraDenied} closeLabel={copy.cameraClose} onClose={() => setCamera(false)} onResult={cameraResult} /></Suspense>}
     </div>
   );
 }

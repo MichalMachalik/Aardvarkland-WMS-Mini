@@ -13,7 +13,7 @@ The preview opens the same warehouse application as the standalone web build, wi
 - products, categories, locations and minimum stock
 - receiving, issuing, moving and counting
 - barcodes, batches and expiry dates
-- keyboard and camera scanning
+- barcode scanning with a keyboard reader, camera or saved image
 - CSV/XLSX import and Excel, CSV and PDF export
 - searchable, append-only movement history
 - versioned JSON backup and restore
@@ -92,7 +92,7 @@ Náhled otevře stejnou skladovou aplikaci jako samostatné webové sestavení. 
 - Produkty, kategorie, skladové pozice a minimální zásoby.
 - Příjem, výdej, přesuny a inventura.
 - Čárové kódy, šarže a data expirace.
-- Skenování kamerou nebo čtečkou v režimu klávesnice.
+- Čtení kódů kamerou, čtečkou v režimu klávesnice nebo z uloženého snímku.
 - Import CSV/XLSX a export do Excelu, CSV a PDF.
 - Prohledávatelná historie pohybů, do které se záznamy pouze přidávají.
 - Verzované zálohy do JSON a obnovení ze zálohy.

@@ -1,4 +1,5 @@
 import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser';
+import { DecodeHintType } from '@zxing/library';
 import { useEffect, useRef, useState } from 'react';
 
 interface CameraScannerProps {
@@ -25,7 +26,7 @@ export function CameraScanner({ hint, denied, closeLabel, onResult, onClose }: C
     async function start(preview: HTMLVideoElement) {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
         });
         if (!active) {
@@ -33,7 +34,7 @@ export function CameraScanner({ hint, denied, closeLabel, onResult, onClose }: C
           return;
         }
 
-        const reader = new BrowserMultiFormatReader();
+        const reader = new BrowserMultiFormatReader(new Map([[DecodeHintType.TRY_HARDER, true]]));
         controls = await reader.decodeFromStream(stream, preview, (result, _error, scanner) => {
           if (!active || !result || handled) return;
           handled = true;

@@ -1,10 +1,13 @@
+import { Capacitor } from '@capacitor/core';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import './styles.css';
 import './visual-tuning.css';
 
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator && Capacitor.isNativePlatform()) {
+  void navigator.serviceWorker.getRegistration().then(registration => registration?.unregister()).catch(() => undefined);
+} else if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     void navigator.serviceWorker.register('./sw.js').then((registration) => {
       const announce = () => window.dispatchEvent(new Event('wms-mini:update-ready'));

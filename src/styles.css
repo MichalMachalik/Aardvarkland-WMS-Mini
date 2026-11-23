@@ -1217,7 +1217,7 @@ tbody tr.is-warning {
 
 .scan-row {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto auto;
+  grid-template-columns: minmax(140px, 1fr) auto auto auto;
   gap: 9px;
 }
 
@@ -1709,7 +1709,8 @@ tbody tr.is-warning {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .scan-input {
+  .scan-input,
+  .scan-image-button {
     grid-column: 1 / -1;
   }
 

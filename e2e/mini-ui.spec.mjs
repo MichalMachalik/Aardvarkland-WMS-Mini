@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 
 const UI_DIR = 'artifacts/ui';
 const now = '2026-08-17T00:00:00.000Z';
@@ -199,6 +199,44 @@ test.describe('WMS-Mini visual smoke', () => {
     await scan.press('Enter');
     await expect(selection).toContainText('Mazivo 500 ml');
     await expect(scan).toHaveValue('859000000002');
+  });
+
+  test('a saved QR image selects the product and an unreadable image clears it', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await seedMini(page);
+    await openMini(page);
+    await page.locator('.mobile-nav button').nth(2).click();
+
+    const fixture = await readFile(new URL('./fixtures/product-oil-qr.png', import.meta.url));
+    const pickerButton = page.getByRole('button', { name: 'Načíst z obrázku', exact: true });
+    const [picker] = await Promise.all([page.waitForEvent('filechooser'), pickerButton.click()]);
+    await picker.setFiles({ name: 'barcode.png', mimeType: 'image/png', buffer: fixture });
+
+    const product = page.getByRole('combobox', { name: 'Produkt', exact: true });
+    await expect(product).toHaveValue('product-lube');
+
+    const inverted = await page.evaluate(async (data) => {
+      const image = new Image();
+      image.src = 'data:image/png;base64,' + data;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext('2d');
+      context.filter = 'invert(1)';
+      context.drawImage(image, 0, 0);
+      return canvas.toDataURL('image/png').split(',')[1];
+    }, fixture.toString('base64'));
+
+    await product.selectOption('product-gloves');
+    const imageInput = page.locator('.scan-row input[type=file]');
+    await imageInput.setInputFiles({ name: 'barcode.png', mimeType: 'image/png', buffer: Buffer.from(inverted, 'base64') });
+    await expect(product).toHaveValue('product-lube');
+
+    await imageInput.setInputFiles({ name: 'barcode.png', mimeType: 'image/png', buffer: Buffer.from('invalid image') });
+    await expect(page.getByText(/^Kód se nepodařilo přečíst/)).toBeVisible();
+    await expect(product).toHaveValue('');
+    await expect(page.locator('.selected-product')).toHaveCount(0);
   });
 
   test('unknown and ambiguous scans cannot reuse a previous product', async ({ page }) => {
