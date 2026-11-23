@@ -4,7 +4,7 @@
 
 Offline warehouse app for one device. It runs as a PWA or Android app and keeps warehouse data locally.
 
-[Live Preview](https://michalmachalik.github.io/Aardvarkland-WMS-Mini/) · [Android notes](ANDROID.md) · [Full WMS](https://github.com/MichalMachalik/Aardvarkland-WMS)
+[Live Preview](https://michalmachalik.github.io/Aardvarkland-WMS-Mini/) · [Android APK](https://github.com/MichalMachalik/Aardvarkland-WMS-Mini/releases/latest) · [Android notes](ANDROID.md) · [Full WMS](https://github.com/MichalMachalik/Aardvarkland-WMS)
 
 The preview opens the same warehouse application as the standalone web build, with a sample workspace. Its changes and movement history are stored in your browser profile.
 
@@ -83,7 +83,7 @@ Camera scanning, PWA installation and Android data retention should be checked o
 
 Skladová aplikace pro jedno zařízení. Funguje offline jako PWA i jako aplikace pro Android a skladová data ukládá místně.
 
-[Veřejný náhled](https://michalmachalik.github.io/Aardvarkland-WMS-Mini/) · [Pokyny pro Android](ANDROID.md) · [Plná verze WMS](https://github.com/MichalMachalik/Aardvarkland-WMS)
+[Veřejný náhled](https://michalmachalik.github.io/Aardvarkland-WMS-Mini/) · [APK pro Android](https://github.com/MichalMachalik/Aardvarkland-WMS-Mini/releases/latest) · [Pokyny pro Android](ANDROID.md) · [Plná verze WMS](https://github.com/MichalMachalik/Aardvarkland-WMS)
 
 Náhled otevře stejnou skladovou aplikaci jako samostatné webové sestavení. Obsahuje ukázkový sklad. Změny a historie pohybů se ukládají v profilu prohlížeče.
 

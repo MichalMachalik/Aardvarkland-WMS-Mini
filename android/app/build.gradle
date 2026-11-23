@@ -20,6 +20,7 @@ android {
     def releaseKeystorePassword = System.getenv("WMS_MINI_KEYSTORE_PASSWORD")
     def releaseKeyAlias = System.getenv("WMS_MINI_KEY_ALIAS")
     def releaseKeyPassword = System.getenv("WMS_MINI_KEY_PASSWORD")
+    def githubApk = providers.environmentVariable("AARDVARKLAND_GITHUB_APK").orNull == "1"
     signingConfigs {
         if (releaseKeystorePath && releaseKeystorePassword && releaseKeyAlias && releaseKeyPassword) {
             release {
@@ -32,6 +33,9 @@ android {
     }
     buildTypes {
         release {
+            if (githubApk) {
+                applicationIdSuffix ".github"
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (signingConfigs.findByName("release")) {

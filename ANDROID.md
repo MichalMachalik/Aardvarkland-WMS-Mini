@@ -1,5 +1,7 @@
 # Android build and delivery
 
+The [signed GitHub APK](https://github.com/MichalMachalik/Aardvarkland-WMS-Mini/releases/latest) requires Android 7 or newer. Its package ID is `cz.aardvarkland.wmsmini.github`, which allows installation alongside an earlier build.
+
 ## Required environment
 
 - Node.js 24.15+ and npm 11.12+
@@ -26,6 +28,8 @@ Outputs:
 - `android/app/build/outputs/apk/debug/app-debug.apk` – debug-installable APK;
 - `android/app/build/outputs/bundle/release/app-release.aab` – unsigned release
   configuration artifact until a customer production keystore is supplied.
+
+To build a signed APK, sync the assets using `npm run android:sync`, set the release signing environment variables and run `gradlew.bat assembleRelease` from `android/`. Set `AARDVARKLAND_GITHUB_APK=1` for the GitHub package ID.
 
 ## Device install and acceptance
 
