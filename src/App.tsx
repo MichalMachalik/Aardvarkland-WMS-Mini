@@ -590,7 +590,7 @@ function Operations({ state, setState, copy, notify, initialType }: {
           <button className="button wide-field" type="submit" disabled={!state.products.length || !state.locations.length}>{copy.submitMovement}</button>
         </form>
       </Card>
-      {camera && <Suspense fallback={<div className="camera-backdrop"><div className="camera-loading" role="status"><UiIcon name="camera" /><span>{copy.cameraOpen}</span></div></div>}><CameraScanner hint={copy.cameraHint} denied={copy.cameraDenied} onClose={() => setCamera(false)} onResult={(value) => { setCamera(false); setScan(value); resolveScan(value); }} /></Suspense>}
+      {camera && <Suspense fallback={<div className="camera-backdrop"><div className="camera-loading" role="status"><UiIcon name="camera" /><span>{copy.cameraOpen}</span></div></div>}><CameraScanner hint={copy.cameraHint} denied={copy.cameraDenied} closeLabel={copy.cameraClose} onClose={() => setCamera(false)} onResult={(value) => { setCamera(false); setScan(value); resolveScan(value); }} /></Suspense>}
     </div>
   );
 }

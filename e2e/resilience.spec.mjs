@@ -25,6 +25,29 @@ async function move(page, type, qty, note) {
 }
 const errorsFor = page => { const errors=[]; page.on('pageerror', e=>errors.push(e.message)); return errors; };
 
+test('closing the scanner releases a camera stream that arrives later', async ({ page }) => {
+  await page.addInitScript(() => {
+    navigator.mediaDevices.getUserMedia = () => new Promise((resolve) => {
+      window.deliverTestCamera = () => {
+        const canvas = document.createElement('canvas');
+        const stream = canvas.captureStream(1);
+        window.testCameraTrack = stream.getVideoTracks()[0];
+        resolve(stream);
+      };
+    });
+  });
+  await boot(page);
+  await page.locator('.mobile-nav button').nth(2).click();
+  await page.getByRole('button', { name: 'Open camera', exact: true }).click();
+  const close = page.getByRole('button', { name: 'Close camera', exact: true });
+  await expect(close).toBeVisible();
+  await expect.poll(() => page.evaluate(() => typeof window.deliverTestCamera)).toBe('function');
+
+  await close.click();
+  await page.evaluate(() => window.deliverTestCamera());
+  await expect.poll(() => page.evaluate(() => window.testCameraTrack.readyState)).toBe('ended');
+});
+
 test('English phone wrapper, original onboarding, selected SVG flags and light/dark source UI', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1100 });
   const errors = errorsFor(page);
